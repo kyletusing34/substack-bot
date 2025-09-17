@@ -1,5 +1,4 @@
 name: Substack Bot Automation
-
 on:
   schedule:
     # Run every weekday at 9:30 AM EST (2:30 PM UTC)
@@ -11,7 +10,6 @@ on:
         required: false
         default: 'true'
         type: boolean
-
 jobs:
   run-substack-bot:
     runs-on: ubuntu-latest
@@ -21,7 +19,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
@@ -33,17 +31,6 @@ jobs:
         
     - name: Run Substack Bot
       env:
-        SUBSTACK_EMAIL: ${{ secrets.SUBSTACK_EMAIL }}
-        SUBSTACK_PASSWORD: ${{ secrets.SUBSTACK_PASSWORD }}
+        SUBSTACK_COOKIE: ${{ secrets.SUBSTACK_COOKIE }}
       run: |
         python substack_bot.py
-        
-    - name: Upload logs (if failure)
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: bot-logs
-        path: |
-          *.log
-          screenshots/
-        retention-days: 7
