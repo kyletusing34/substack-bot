@@ -1,0 +1,49 @@
+name: Substack Bot Automation
+
+on:
+  schedule:
+    # Run every weekday at 9:30 AM EST (2:30 PM UTC)
+    - cron: '30 14 * * 1-5'
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      run_immediately:
+        description: 'Run the bot immediately'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  run-substack-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        playwright install chromium
+        
+    - name: Run Substack Bot
+      env:
+        SUBSTACK_EMAIL: ${{ secrets.SUBSTACK_EMAIL }}
+        SUBSTACK_PASSWORD: ${{ secrets.SUBSTACK_PASSWORD }}
+      run: |
+        python substack_bot.py
+        
+    - name: Upload logs (if failure)
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: bot-logs
+        path: |
+          *.log
+          screenshots/
+        retention-days: 7
